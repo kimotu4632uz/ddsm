@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ddsm"
+dynamic = ["version"]
+description = "A Python library for Data-driven Dynamical Systems Modeling"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {"name" = "fumito100111", "email" = "146402169+fumito100111@users.noreply.github.com"}
+]
+license = {text = "MIT"}
+dependencies = [
+    "numpy",
+    "scipy",
+    "scikit-learn"
+]
+
+[project.urls]
+Homepage = "https://github.com/fumito100111/ddsm"
+Repository = "https://github.com/fumito100111/ddsm.git"
+Issues = "https://github.com/fumito100111/ddsm/issues"
+
+[project.optional-dependencies]
+dev = [
+    "ipykernel",
+    "matplotlib",
+    "seaborn"
+]
+test = []
+
+[tool.setuptools_scm]
+
+[tool.setuptools.packages.find]
+include = ["ddsm"]
+exclude = []
