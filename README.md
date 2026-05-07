@@ -20,9 +20,9 @@ This library provides tools for modeling and analyzing dynamical systems using d
 - [Installation](#installation)
 - [Usage](#usage)
   - [Supported Estimators](#supported-estimators)
-  - [EDMD](#edmd)
-  - [gEDMD](#gedmd)
-  - [SINDy](#sindy)
+    - [EDMD](#edmd)
+    - [gEDMD](#gedmd)
+    - [SINDy](#sindy)
 - [References](#references)
 - [Open Source Software](#open-source-software)
 - [License](#license)
@@ -54,7 +54,7 @@ python -m pip install git+https://github.com/fumito100111/ddsm.git@v0.0.0
 > [!NOTE]
 > For more details on how to use each estimator, please refer to the [samples](./samples) directory.
 
-### EDMD
+#### EDMD
 
 ```python
 import numpy as np
@@ -78,7 +78,7 @@ K = estimator.right_K
 L = estimator.left_L(dt=dt)
 ```
 
-### gEDMD
+#### gEDMD
 
 ```python
 import numpy as np
@@ -102,7 +102,7 @@ L = estimator.right_L
 K = estimator.left_K(dt=dt)
 ```
 
-### SINDy
+#### SINDy
 
 ```python
 import numpy as np
@@ -138,6 +138,7 @@ L = estimator.right_L
 `DDSM` uses the following open source software:
 
 - [NumPy](https://numpy.org/)
+- [SymPy](https://www.sympy.org/)
 - [SciPy](https://scipy.org/)
 - [Scikit-learn](https://scikit-learn.org/)
 
