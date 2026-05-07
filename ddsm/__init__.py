@@ -1,5 +1,7 @@
 __all__ = [
-    'base'
+    'base',
+    'dicts'
 ]
 
 from . import base
+from . import dicts
