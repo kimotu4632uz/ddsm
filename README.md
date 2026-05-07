@@ -11,11 +11,18 @@
 `DDSM` is a Python library for Data-driven Dynamical systems modeling.
 This library provides tools for modeling and analyzing dynamical systems using data-driven approaches.
 
+> [!NOTE]
+> Estimators in `DDSM` are **fully compatible with the Scikit-learn API**.
+
 ## Table of Contents <!-- omit in toc -->
 
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Supported Estimators](#supported-estimators)
+  - [EDMD](#edmd)
+  - [gEDMD](#gedmd)
+  - [SINDy](#sindy)
 - [References](#references)
 - [Open Source Software](#open-source-software)
 - [License](#license)
