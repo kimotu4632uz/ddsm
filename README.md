@@ -1,8 +1,15 @@
 # DDSM (Data-driven Dynamical Systems Modeling) <!-- omit in toc -->
 
+[![Version](https://img.shields.io/badge/version-v0.0.0-1a7f37)](https://github.com/fumito100111/ddsm/releases)
+[![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub issues](https://img.shields.io/github/issues/fumito100111/ddsm)](https://github.com/fumito100111/ddsm/issues)
+[![GitHub stars](https://img.shields.io/github/stars/fumito100111/ddsm?style=social)](https://github.com/fumito100111/ddsm/stargazers)
+
 ## Overview <!-- omit in toc -->
 
-`DDSM` is a Python library for data-driven dynamical systems modeling.
+`DDSM` is a Python library for Data-driven Dynamical systems modeling.
+This library provides tools for modeling and analyzing dynamical systems using data-driven approaches.
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -18,10 +25,10 @@
 
 ## Installation
 
-You can install the latest version of `DDSM` using pip:
+You can install the latest version of `DDSM` using pip (From GitHub):
 
 ```bash
-python3 -m pip install git+https://github.com/fumito100111/ddsm.git@v0.0.0
+python -m pip install git+https://github.com/fumito100111/ddsm.git@v0.0.0
 ```
 
 > [!TIP]
@@ -29,6 +36,86 @@ python3 -m pip install git+https://github.com/fumito100111/ddsm.git@v0.0.0
 > For example, to install version `v0.0.0`, use `@v0.0.0`.
 
 ## Usage
+
+### Supported Estimators
+
+- [EDMD](#edmd)
+- [gEDMD](#gedmd)
+- [SINDy](#sindy)
+
+> [!NOTE]
+> For more details on how to use each estimator, please refer to the [samples](./samples) directory.
+
+### EDMD
+
+```python
+import numpy as np
+from ddsm.dicts import MonomialsDict
+from ddsm.estimators import EDMD
+
+dt = 1.0e-3                 # Time interval between data points
+x = np.random.rand(100, 2)  # Sample data at time t
+y = np.sin(x)               # Sample target data at time t + dt
+
+estimator = EDMD(
+    psix_cls=MonomialsDict,
+    psix_kwargs={"degree": 2},
+    psiy_cls=MonomialsDict,
+    psiy_kwargs={"degree": 2},
+    reg='none'
+)
+estimator.fit(x, y)
+
+K = estimator.right_K
+L = estimator.left_L(dt=dt)
+```
+
+### gEDMD
+
+```python
+import numpy as np
+from ddsm.dicts import MonomialsDict
+from ddsm.estimators import gEDMD
+
+dt = 1.0e-3                 # Time interval between data points
+x = np.random.rand(100, 2)  # Sample data at time t
+y = np.sin(x)               # Sample target data at time t + dt
+dx = (y - x) / dt           # Sample derivative data at time t
+
+estimator = gEDMD(
+    psi_cls=MonomialsDict,
+    psi_kwargs={"degree": 2},
+    reg='lasso',
+    reg_kwargs={"alpha": 0.1}
+)
+estimator.fit(x, dx)
+
+L = estimator.right_L
+K = estimator.left_K(dt=dt)
+```
+
+### SINDy
+
+```python
+import numpy as np
+from ddsm.dicts import MonomialsDict
+from ddsm.estimators import SINDy
+
+dt = 1.0e-3                 # Time interval between data points
+x = np.random.rand(100, 2)  # Sample data at time t
+y = np.sin(x)               # Sample target data at time t + dt
+dx = (y - x) / dt           # Sample derivative data at time t
+
+estimator = SINDy(
+    psi_cls=MonomialsDict,
+    psi_kwargs={"degree": 2},
+    threshold=0.1,
+    max_iter=20
+)
+estimator.fit(x, dx)
+
+L = estimator.right_L
+```
 
 ## Open Source Software
 
