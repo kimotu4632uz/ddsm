@@ -35,4 +35,4 @@ test = []
 
 [tool.setuptools.packages.find]
 include = ["ddsm"]
-exclude = []
+exclude = ["samples"]
