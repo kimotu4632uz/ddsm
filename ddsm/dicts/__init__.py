@@ -1,1 +1,4 @@
-from ._dicts import IdentityDict
+from ._dicts import (
+    IdentityDict,
+    MonomialsDict
+)
