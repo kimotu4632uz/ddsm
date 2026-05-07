@@ -16,6 +16,7 @@ This library provides tools for modeling and analyzing dynamical systems using d
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
+- [References](#references)
 - [Open Source Software](#open-source-software)
 - [License](#license)
 
@@ -116,6 +117,14 @@ estimator.fit(x, dx)
 
 L = estimator.right_L
 ```
+
+## References
+
+1. Williams, M. O., Kevrekidis, I. G., & Rowley, C. W. (2015). A Data-Driven Approximation of the Koopman Operator: Extending Dynamic Mode Decomposition. *Journal of Nonlinear Science*, 25, 1307-1346.
+
+2. Brunton, S. L., Proctor, J. L., & Kutz, J. N. (2016). Discovering governing equations from data by sparse identification of nonlinear dynamical systems. *Proceedings of the National Academy of Sciences (PNAS)*.
+
+3. Klus, S., Nüske, F., Peitz, S., Niemann, J. H., Clementi, C., & Schütte, C. (2020). Data-driven approximation of the Koopman generator: Model reduction, system identification, and control. *Physica D: Nonlinear Phenomena*, 406, 132416.
 
 ## Open Source Software
 
