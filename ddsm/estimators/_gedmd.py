@@ -10,6 +10,30 @@ from ..base._estimators import DDSMBaseEstimator
 from ..dicts._dicts import IdentityDict
 
 class gEDMD(DDSMBaseEstimator):
+    """
+    Generator Extended Dynamic Mode Decomposition (gEDMD) estimator.
+
+    Computes the continuous-time Koopman generator directly from data pairs
+    $(X, \dot{X})$ using the chain rule and dictionary derivatives.
+
+    Parameters
+    ----------
+    psi_cls : type[BaseDict], default=IdentityDict
+        Class type for the lifting dictionary.
+    psi_kwargs : dict, optional
+        Arguments for initializing `psi_cls`.
+    reg : {'none', 'lasso', 'ridge'}, default='none'
+        Regularization type for computing the generator matrix.
+    reg_kwargs : dict, optional
+        Arguments passed to the underlying Scikit-learn regressor.
+
+    Attributes
+    ----------
+    psi_ : BaseDict
+        Fitted lifting dictionary instance.
+    L_ : ndarray
+        The estimated Koopman generator matrix.
+    """
     psi_: BaseDict
     L_: np.ndarray
     _psi_cls: type[BaseDict]
@@ -19,6 +43,7 @@ class gEDMD(DDSMBaseEstimator):
     _is_psi_fitted: bool
     _y_ndim_1d: bool
     _y_features: int
+
     def __init__(
         self,
         psi_cls: type[BaseDict] = IdentityDict,
@@ -26,6 +51,7 @@ class gEDMD(DDSMBaseEstimator):
         reg:Literal['none', 'lasso', 'ridge'] = 'none',
         reg_kwargs: dict[str, Any] | None = None
     ) -> None:
+        """Initialize the gEDMD estimator."""
         super(gEDMD, self).__init__()
         self.psi_cls = psi_cls
         self.psi_kwargs = psi_kwargs
@@ -33,6 +59,21 @@ class gEDMD(DDSMBaseEstimator):
         self.reg_kwargs = reg_kwargs
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> gEDMD:
+        """
+        Fit the gEDMD model to estimate the generator L.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_samples, n_features)
+            State at current time steps.
+        y : ndarray of shape (n_samples, n_features)
+            Time derivatives of the state (dot{X}).
+
+        Returns
+        -------
+        gEDMD
+            The fitted instance.
+        """
         X, y = validate_data(self, X, y, reset=True, multi_output=True)
         self._y_ndim_1d = (y.ndim == 1)
         if self._y_ndim_1d:
@@ -64,6 +105,19 @@ class gEDMD(DDSMBaseEstimator):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """
+        Predict the time derivative dot{X} given state X.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_samples, n_features)
+            Current state.
+
+        Returns
+        -------
+        ndarray of shape (n_samples, n_features)
+            Predicted time derivative.
+        """
         check_is_fitted(self, 'L_')
         X = validate_data(self, X, reset=False)
         PsiX = self.psi_.lift(X)
@@ -76,6 +130,14 @@ class gEDMD(DDSMBaseEstimator):
         return y
 
     def _fit_psi(self, X: np.ndarray) -> None:
+        """
+        Initialize and fit the lifting dictionary (Psi).
+
+        Parameters
+        ----------
+        X : ndarray
+            Training data used to determine dictionary parameters.
+        """
         if not hasattr(self, 'psi_') or not self._is_psi_fitted:
             self.psi_ = self.psi_cls(**self.psi_kwargs.copy() if self.psi_kwargs is not None else {})
             self.psi_.fit(X)
@@ -83,21 +145,50 @@ class gEDMD(DDSMBaseEstimator):
 
     @property
     def right_L(self) -> np.ndarray:
+        """The Koopman generator matrix acting on the right."""
         check_is_fitted(self, 'L_')
         return self.L_
 
     @property
     def left_L(self) -> np.ndarray:
+        """The Koopman generator matrix acting on the left (adjoint)."""
         return self.right_L.conj().T
 
     def right_K(self, dt: float) -> np.ndarray:
+        """
+        Compute the discrete-time Koopman operator for a step dt.
+
+        Parameters
+        ----------
+        dt : float
+            Time step size.
+
+        Returns
+        -------
+        ndarray
+            Matrix exponential of (L * dt).
+        """
         return linalg.expm(self.right_L * dt)
 
     def left_K(self, dt: float) -> np.ndarray:
+        """
+        Compute the adjoint discrete-time Koopman operator.
+
+        Parameters
+        ----------
+        dt : float
+            Time step size.
+
+        Returns
+        -------
+        ndarray
+            Adjoint of the right Koopman operator.
+        """
         return self.right_K(dt).conj().T
 
     @property
     def psi_cls(self) -> type[BaseDict]:
+        """Class type for the lifting dictionary. Resets fit state on change."""
         return self._psi_cls
 
     @psi_cls.setter
@@ -107,6 +198,7 @@ class gEDMD(DDSMBaseEstimator):
 
     @property
     def psi_kwargs(self) -> dict[str, Any]:
+        """Keyword arguments for dictionary initialization. Resets fit state on change."""
         return self._psi_kwargs
 
     @psi_kwargs.setter
@@ -116,6 +208,7 @@ class gEDMD(DDSMBaseEstimator):
 
     @property
     def reg(self) -> Literal['none', 'lasso', 'ridge']:
+        """Regularization method: 'none', 'lasso', or 'ridge'."""
         return self._reg
 
     @reg.setter
@@ -124,6 +217,7 @@ class gEDMD(DDSMBaseEstimator):
 
     @property
     def reg_kwargs(self) -> dict[str, Any]:
+        """Keyword arguments for the regularization estimator."""
         return self._reg_kwargs
 
     @reg_kwargs.setter
@@ -132,6 +226,7 @@ class gEDMD(DDSMBaseEstimator):
 
     @property
     def is_psi_fitted(self) -> bool:
+        """Boolean flag indicating if the lifting dictionary is fitted."""
         return self._is_psi_fitted
 
     @is_psi_fitted.setter

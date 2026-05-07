@@ -9,6 +9,33 @@ from ..base._estimators import DDSMBaseEstimator
 from ..dicts._dicts import IdentityDict
 
 class SINDy(DDSMBaseEstimator):
+    """
+    Sparse Identification of Non-linear Dynamics (SINDy) estimator.
+
+    Uses Sequentially Thresholded Least Squares (STLS) to find a sparse
+    mapping between a feature library and time derivatives.
+
+    Parameters
+    ----------
+    psi_cls : type[BaseDict], default=IdentityDict
+        Class type for the candidate function library (dictionary).
+    psi_kwargs : dict, optional
+        Arguments for initializing `psi_cls`.
+    threshold : float, default=0.1
+        Sparsity threshold. Coefficients with absolute values smaller
+        than this are set to zero.
+    max_iter : int, default=20
+        Maximum number of STLS iterations.
+
+    Attributes
+    ----------
+    psi_ : BaseDict
+        Fitted candidate library instance.
+    L_ : ndarray
+        The estimated sparse coefficient matrix.
+    n_iter_ : int
+        Actual number of iterations performed during fitting.
+    """
     psi_: BaseDict
     L_: np.ndarray
     _psi_cls: type[BaseDict]
@@ -18,6 +45,7 @@ class SINDy(DDSMBaseEstimator):
     _is_psi_fitted: bool
     _y_ndim_1d: bool
     _y_features: int
+
     def __init__(
         self,
         psi_cls: type[BaseDict] = IdentityDict,
@@ -25,6 +53,7 @@ class SINDy(DDSMBaseEstimator):
         threshold: float = 0.1,
         max_iter: int = 20
     ) -> None:
+        """Initialize the SINDy estimator."""
         super(SINDy, self).__init__()
         self.psi_cls = psi_cls
         self.psi_kwargs = psi_kwargs
@@ -32,6 +61,26 @@ class SINDy(DDSMBaseEstimator):
         self.max_iter = max_iter
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> SINDy:
+        """
+        Fit the SINDy model using STLS.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_samples, n_features)
+            State at current time steps.
+        y : ndarray of shape (n_samples, n_features)
+            Time derivatives of the state (dot{X}).
+
+        Returns
+        -------
+        SINDy
+            The fitted instance.
+
+        Raises
+        ------
+        ValueError
+            If y contains non-numeric data.
+        """
         X, y = validate_data(self, X, y, reset=True, multi_output=True)
         if y.dtype == object:
             raise ValueError('Unknown label type: SINDy does not support object dtype for y. Ensure that y is a numeric array.')
@@ -61,6 +110,19 @@ class SINDy(DDSMBaseEstimator):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """
+        Predict time derivatives dot{X} using the sparse model.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_samples, n_features)
+            Current state.
+
+        Returns
+        -------
+        ndarray of shape (n_samples, n_features)
+            Predicted time derivatives.
+        """
         check_is_fitted(self, 'L_')
         X = validate_data(self, X, reset=False)
         PsiX = self.psi_.lift(X)
@@ -72,6 +134,14 @@ class SINDy(DDSMBaseEstimator):
         return y
 
     def _fit_psi(self, X: np.ndarray) -> None:
+        """
+        Initialize and fit the library dictionary (Psi).
+
+        Parameters
+        ----------
+        X : ndarray
+            Training data used to determine library parameters.
+        """
         if not hasattr(self, 'psi_') or not self._is_psi_fitted:
             self.psi_ = self.psi_cls(**self.psi_kwargs.copy() if self.psi_kwargs is not None else {})
             self.psi_.fit(X)
@@ -79,15 +149,18 @@ class SINDy(DDSMBaseEstimator):
 
     @property
     def right_L(self) -> np.ndarray:
+        """The Koopman generator matrix acting on the right."""
         check_is_fitted(self, 'L_')
         return self.L_
 
     @property
     def left_L(self) -> np.ndarray:
+        """The Koopman generator matrix acting on the left (adjoint)."""
         return self.right_L.conj().T
 
     @property
     def psi_cls(self) -> type[BaseDict]:
+        """Class type for the lifting dictionary. Resets fit state on change."""
         return self._psi_cls
 
     @psi_cls.setter
@@ -97,6 +170,7 @@ class SINDy(DDSMBaseEstimator):
 
     @property
     def psi_kwargs(self) -> dict[str, Any]:
+        """Keyword arguments for dictionary initialization. Resets fit state on change."""
         return self._psi_kwargs
 
     @psi_kwargs.setter
@@ -106,6 +180,7 @@ class SINDy(DDSMBaseEstimator):
 
     @property
     def threshold(self) -> float:
+        """Sparsity threshold for coefficient masking."""
         return self._threshold
 
     @threshold.setter
@@ -114,6 +189,7 @@ class SINDy(DDSMBaseEstimator):
 
     @property
     def max_iter(self) -> int:
+        """Maximum allowed iterations for the STLS algorithm."""
         return self._max_iter
 
     @max_iter.setter
@@ -122,6 +198,7 @@ class SINDy(DDSMBaseEstimator):
 
     @property
     def is_psi_fitted(self) -> bool:
+        """Boolean flag indicating if the lifting dictionary is fitted."""
         return self._is_psi_fitted
 
     @is_psi_fitted.setter
