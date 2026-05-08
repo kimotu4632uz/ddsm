@@ -23,6 +23,8 @@ This library provides tools for modeling and analyzing dynamical systems using d
     - [EDMD](#edmd)
     - [gEDMD](#gedmd)
     - [SINDy](#sindy)
+  - [Utilities](#utilities)
+    - [ddsm.utils.generator\_to\_eq](#ddsmutilsgenerator_to_eq)
 - [References](#references)
 - [Open Source Software](#open-source-software)
 - [License](#license)
@@ -123,6 +125,47 @@ estimator = SINDy(
 estimator.fit(x, dx)
 
 L = estimator.right_L
+```
+
+### Utilities
+
+`DDSM` also provides the following utility functions:
+
+- [`ddsm.utils.generator_to_eq`](#ddsmutilsgenerator_to_eq): Convert a generator matrix to a system of equations.
+
+> [!NOTE]
+> For more details on how to use the utility functions, please refer to the [samples](./samples) directory.
+
+#### ddsm.utils.generator_to_eq
+
+This function converts a generator matrix obtained into a system of equations, separating the drift and diffusion terms.
+
+```python
+import numpy as np
+from ddsm.dicts import MonomialsDict
+from ddsm.estimators import gEDMD
+from ddsm.utils import generator_to_eq
+
+dt = 1.0e-3                 # Time interval between data points
+x = np.random.rand(100, 2)  # Sample data at time t
+y = np.sin(x)               # Sample target data at time t + dt
+dx = (y - x) / dt           # Sample derivative data at time t
+
+estimator = gEDMD(
+    psi_cls=MonomialsDict,
+    psi_kwargs={"degree": 2},
+    reg='lasso',
+    reg_kwargs={"alpha": 0.1}
+)
+estimator.fit(x, dx)
+
+right_L = estimator.right_L
+psi = estimator.psi_
+eq = generator_to_eq(right_L, psi)
+print('----- Drift Term -----')
+print(eq.drift)
+print('----- Diffusion Term -----')
+print(eq.diff)
 ```
 
 ## References
