@@ -106,7 +106,8 @@ def generator_to_eq(right_L: np.ndarray, psi: MonomialsDict, threshold_drift: fl
                 if threshold_drift is not None and abs(l[j]) < threshold_drift:
                     continue
                 drift_expr += l[j] * basis_functions[j]
-            drift_expr = drift_expr.expand()
+            if drift_expr != 0:
+                drift_expr = drift_expr.expand()
             drift_exprs.append(drift_expr)
 
         diff_exprs = np.zeros((psi.dim_, psi.dim_), dtype=object)
@@ -120,11 +121,13 @@ def generator_to_eq(right_L: np.ndarray, psi: MonomialsDict, threshold_drift: fl
                     diff_expr += l[k] * basis_functions[k]
                 if i == j:
                     diff_expr -= (2 * drift_exprs[i] * xi[i]).expand()
-                    diff_expr = diff_expr.expand()
+                    if diff_expr != 0:
+                        diff_expr = diff_expr.expand()
                     diff_exprs[i, j] = diff_expr
                 else:
                     diff_expr -= (drift_exprs[i] * xi[j] + drift_exprs[j] * xi[i]).expand()
-                    diff_expr = diff_expr.expand()
+                    if diff_expr != 0:
+                        diff_expr = diff_expr.expand()
                     diff_exprs[i, j] = diff_expr
                     diff_exprs[j, i] = diff_expr
         return Equation(sympy.Matrix(drift_exprs), sympy.Matrix(diff_exprs))
@@ -139,6 +142,7 @@ def generator_to_eq(right_L: np.ndarray, psi: MonomialsDict, threshold_drift: fl
                 if threshold_drift is not None and abs(l[j]) < threshold_drift:
                     continue
                 drift_expr += l[j] * basis_functions[j]
-            drift_expr = drift_expr.expand()
+            if drift_expr != 0:
+                drift_expr = drift_expr.expand()
             drift_exprs.append(drift_expr)
         return Equation(sympy.Matrix(drift_exprs), None)
