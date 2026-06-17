@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 import numpy as np
 import sympy
-from ..dicts._dicts import MonomialsDict
+
+from ..dicts.monomials import MonomialsDict
+
 
 class Equation(object):
     """

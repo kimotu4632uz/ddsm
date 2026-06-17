@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Any
+
 import abc
+from typing import Any
+
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
+
 
 class DDSMBaseEstimator(abc.ABC, RegressorMixin, BaseEstimator):
     """

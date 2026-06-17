@@ -1,12 +1,16 @@
 from __future__ import annotations
+
 from typing import Any, Literal
+
 import numpy as np
 from scipy import linalg
 from sklearn.linear_model import Lasso, Ridge
-from sklearn.utils.validation import validate_data, check_is_fitted
+from sklearn.utils.validation import check_is_fitted, validate_data
+
 from ..base._dicts import BaseDict
 from ..base._estimators import DDSMBaseEstimator
 from ..dicts._dicts import IdentityDict
+
 
 class EDMD(DDSMBaseEstimator):
     """

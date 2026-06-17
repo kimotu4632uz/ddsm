@@ -1,9 +1,11 @@
 __all__ = [
     'base',
     'dicts',
-    'estimators'
+    'estimators',
+    'preprocessing'
 ]
 
 from . import base
 from . import dicts
 from . import estimators
+from . import preprocessing

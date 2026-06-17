@@ -1,20 +1,24 @@
 from __future__ import annotations
+
 import warnings
 from typing import Any, Literal
+
 import numpy as np
 from scipy import linalg
 from sklearn.linear_model import Lasso, Ridge
-from sklearn.utils.validation import validate_data, check_is_fitted
+from sklearn.utils.validation import check_is_fitted, validate_data
+
 from ..base._dicts import BaseDict
 from ..base._estimators import DDSMBaseEstimator
 from ..dicts._dicts import IdentityDict
+
 
 class gEDMD(DDSMBaseEstimator):
     """
     Generator Extended Dynamic Mode Decomposition (gEDMD) estimator.
 
     Computes the continuous-time Koopman generator directly from data pairs
-    $(X, \dot{X})$ using the chain rule and dictionary derivatives.
+    $(X, \\dot{X})$ using the chain rule and dictionary derivatives.
 
     Parameters
     ----------
