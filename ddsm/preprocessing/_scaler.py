@@ -2,9 +2,65 @@
 
 from __future__ import annotations
 
+from typing import Self
+
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
+
+
+class IdentityScaler(BaseEstimator, TransformerMixin):
+    """
+    データをスケーリングせずにそのまま返す sklearn 互換 transformer。
+    """
+
+    def fit(self, X: np.ndarray, y: object = None) -> Self:
+        """スケーリング係数を学習する。
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            スケーリング係数の計算に用いるデータ。
+        y : Ignored
+            sklearn API との互換のために存在する。使用しない。
+
+        Returns
+        -------
+        IdentityScaler
+            学習済みの自身。
+        """
+        return self
+
+    def transform(self, X: np.ndarray, y: object = None) -> np.ndarray:
+        """データにスケーリング係数を掛ける。
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            スケーリングするデータ。
+
+        Returns
+        -------
+        np.ndarray
+            スケーリング後のデータ。
+        """
+
+        return X
+
+    def inverse_transform(self, X: np.ndarray) -> np.ndarray:
+        """スケーリングを元に戻す。
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            スケーリング済みのデータ。
+
+        Returns
+        -------
+        np.ndarray
+            元のスケールに戻したデータ。
+        """
+        return X
 
 
 def _power_of_ten_factor(max_abs: float) -> float:
