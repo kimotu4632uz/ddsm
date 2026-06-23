@@ -36,7 +36,7 @@ class EquationBuilder:
         if self._sym_xs is not None:
             raise ValueError("State symbols have already been created.")
 
-        self._sym_xs = symarray("x", (dim,))
+        self._sym_xs = symarray("x", shape=(dim,), index_base=1)
         return np.array(self._sym_xs, copy=True)
 
     def create_param_symbol(self, name: str, value: int | float) -> sp.Symbol:
@@ -94,7 +94,7 @@ class EquationBuilder:
         """
         if isinstance(values, (list, tuple, np.ndarray)):
             val_array = np.array(values)
-            sym_array = symarray(name, val_array.shape)
+            sym_array = symarray(name, shape=val_array.shape, index_base=1)
             self._param_pairs.update(dict(zip(sym_array.flat, val_array.flat)))
             return sym_array
 
