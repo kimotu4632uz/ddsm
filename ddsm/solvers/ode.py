@@ -1,7 +1,6 @@
 """ODE の時間発展 solver と軌道データを提供するモジュール。"""
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Self
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -45,9 +44,9 @@ class Trajectory:
             raise ValueError('initial_state must be a 1D array')
         if self.values.ndim != 2:
             raise ValueError('values must be a 2D array')
-        if self.values.shape[0] != self.initial_state.size:
+        if self.values.shape[1] != self.initial_state.size:
             raise ValueError('value dimension must match initial_state')
-        if self.values.shape[1] != len(self.time_grid.obs_times):
+        if self.values.shape[0] != len(self.time_grid.obs_times):
             raise ValueError('values sample count must match len(time_grid.obs_times)')
 
     @property
@@ -71,7 +70,7 @@ class Trajectory:
         )
 
     @classmethod
-    def load(cls, path: str) -> Self:
+    def load(cls, path: str) -> Trajectory:
         data = np.load(path)
         time_grid = TimeGrid(
             dt=float(data['dt']),
@@ -135,4 +134,4 @@ def solve_ode(
     if not result.success:
         raise RuntimeError('ODE solver failed')
 
-    return Trajectory(time_grid=time_grid, initial_state=initial_state, values=result.y)
+    return Trajectory(time_grid=time_grid, initial_state=initial_state, values=result.y.T)
