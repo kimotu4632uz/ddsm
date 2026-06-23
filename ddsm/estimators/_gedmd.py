@@ -18,7 +18,7 @@ class gEDMD(DDSMBaseEstimator):
     Generator Extended Dynamic Mode Decomposition (gEDMD) estimator.
 
     Computes the continuous-time Koopman generator directly from data pairs
-    $(X, \\dot{X})$ using the chain rule and dictionary derivatives.
+    `(X, \\dot{X})` using the chain rule and dictionary derivatives.
 
     Parameters
     ----------
@@ -71,7 +71,7 @@ class gEDMD(DDSMBaseEstimator):
         X : ndarray of shape (n_samples, n_features)
             State at current time steps.
         y : ndarray of shape (n_samples, n_features)
-            Time derivatives of the state (dot{X}).
+            Time derivatives of the state (`\\dot{X}`).
 
         Returns
         -------

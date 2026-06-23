@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Generic, Literal, Self
 
 import numpy as np
 from scipy import linalg
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.utils.validation import check_is_fitted, validate_data
+from typing_extensions import TypeVar
 
 from ..base._dicts import BaseDict
 from ..base._estimators import DDSMBaseEstimator
 from ..dicts._dicts import IdentityDict
 
+PsiXDict = TypeVar('PsiXDict', bound=BaseDict, default=IdentityDict)
+PsiYDict = TypeVar('PsiYDict', bound=BaseDict, default=IdentityDict)
 
-class EDMD(DDSMBaseEstimator):
+
+class EDMD(DDSMBaseEstimator, Generic[PsiXDict, PsiYDict]):
     """
     Extended Dynamic Mode Decomposition (EDMD) estimator.
 
@@ -40,24 +44,24 @@ class EDMD(DDSMBaseEstimator):
     K_ : ndarray
         The computed Koopman operator (matrix).
     """
-    psix_: BaseDict
-    psiy_: BaseDict
+    psix_: PsiXDict
+    psiy_: PsiYDict
     K_: np.ndarray
-    _psix_cls: type[BaseDict]
-    _psix_kwargs: dict[str, Any]
-    _psiy_cls: type[BaseDict]
-    _psiy_kwargs: dict[str, Any]
+    _psix_cls: type[PsiXDict]
+    _psix_kwargs: dict[str, Any] | None
+    _psiy_cls: type[PsiYDict]
+    _psiy_kwargs: dict[str, Any] | None
     _reg: Literal['none', 'lasso', 'ridge']
-    _reg_kwargs: dict[str, Any]
+    _reg_kwargs: dict[str, Any] | None
     _is_psix_fitted: bool
     _is_psiy_fitted: bool
     _y_ndim_1d: bool
 
     def __init__(
         self,
-        psix_cls: type[BaseDict] = IdentityDict,
+        psix_cls: type[PsiXDict] = IdentityDict,
         psix_kwargs: dict[str, Any] | None = None,
-        psiy_cls: type[BaseDict] = IdentityDict,
+        psiy_cls: type[PsiYDict] = IdentityDict,
         psiy_kwargs: dict[str, Any] | None = None,
         reg:Literal['none', 'lasso', 'ridge'] = 'none',
         reg_kwargs: dict[str, Any] | None = None
@@ -71,7 +75,7 @@ class EDMD(DDSMBaseEstimator):
         self.reg = reg
         self.reg_kwargs = reg_kwargs
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> EDMD:
+    def fit(self, X: np.ndarray, y: np.ndarray) -> Self:
         """
         Fit the EDMD model by estimating the Koopman operator K.
 
@@ -163,18 +167,22 @@ class EDMD(DDSMBaseEstimator):
 
     @property
     def right_K(self) -> np.ndarray:
-        """The Koopman operator acting on the right."""
+        """
+        The Koopman operator acting on the right, i.e., `PsiY = PsiX @ K`.
+        """
         check_is_fitted(self, 'K_')
         return self.K_
 
     @property
     def left_K(self) -> np.ndarray:
-        """The Koopman operator acting on the left (adjoint)."""
+        """
+        The Koopman operator acting on the left (adjoint), i.e., `PsiY = K @ PsiX`.
+        """
         return self.K_.conj().T
 
     def right_L(self, dt: float) -> np.ndarray:
         """
-        The continuous-time generator operator (right).
+        The continuous-time generator operator (right), i.e., `dPsi = Psi @ L`.
 
         Parameters
         ----------
@@ -190,7 +198,7 @@ class EDMD(DDSMBaseEstimator):
 
     def left_L(self, dt: float) -> np.ndarray:
         """
-        The continuous-time generator operator (left/adjoint).
+        The continuous-time generator operator (left/adjoint), i.e., `dPsi = L @ Psi`.
 
         Parameters
         ----------
@@ -205,7 +213,7 @@ class EDMD(DDSMBaseEstimator):
         return self.right_L(dt).conj().T
 
     @property
-    def psix_cls(self) -> type[BaseDict]:
+    def psix_cls(self) -> type[PsiXDict]:
         """
         Class type for the input lifting dictionary.
 
@@ -214,12 +222,12 @@ class EDMD(DDSMBaseEstimator):
         return self._psix_cls
 
     @psix_cls.setter
-    def psix_cls(self, value: type[BaseDict]) -> None:
+    def psix_cls(self, value: type[PsiXDict]) -> None:
         self._psix_cls = value
         self._is_psix_fitted = False
 
     @property
-    def psix_kwargs(self) -> dict[str, Any]:
+    def psix_kwargs(self) -> dict[str, Any] | None:
         """
         Keyword arguments for the input lifting dictionary initialization.
 
@@ -233,7 +241,7 @@ class EDMD(DDSMBaseEstimator):
         self._is_psix_fitted = False
 
     @property
-    def psiy_cls(self) -> type[BaseDict]:
+    def psiy_cls(self) -> type[PsiYDict]:
         """
         Class type for the output lifting dictionary.
 
@@ -242,12 +250,12 @@ class EDMD(DDSMBaseEstimator):
         return self._psiy_cls
 
     @psiy_cls.setter
-    def psiy_cls(self, value: type[BaseDict]) -> None:
+    def psiy_cls(self, value: type[PsiYDict]) -> None:
         self._psiy_cls = value
         self._is_psiy_fitted = False
 
     @property
-    def psiy_kwargs(self) -> dict[str, Any]:
+    def psiy_kwargs(self) -> dict[str, Any] | None:
         """
         Keyword arguments for the output lifting dictionary initialization.
 
@@ -274,7 +282,7 @@ class EDMD(DDSMBaseEstimator):
         self._reg = value
 
     @property
-    def reg_kwargs(self) -> dict[str, Any]:
+    def reg_kwargs(self) -> dict[str, Any] | None:
         """
         Keyword arguments for the regularization (Scikit-learn estimator).
         """
