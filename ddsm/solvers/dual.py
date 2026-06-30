@@ -48,10 +48,10 @@ class StatsTrajectory:
 
         if self.values.ndim != 1:
             raise ValueError("stats must be a 1D array")
-        if self.values.shape[0] != len(self.time_grid.obs_times):
-            raise ValueError("values length must match len(time_grid.obs_times)")
-        if len(self.states) != len(self.time_grid.obs_times):
-            raise ValueError("states length must match len(time_grid.obs_times)")
+        if self.values.shape[0] != len(self.time_grid.obs_times) - 1:
+            raise ValueError("values length must match len(time_grid.obs_times) - 1")
+        if len(self.states) != len(self.time_grid.obs_times) - 1:
+            raise ValueError("states length must match len(time_grid.obs_times) - 1")
 
     @property
     def obs_times(self) -> np.ndarray:
@@ -270,12 +270,12 @@ def solve_dual_ode(
     for step in time_grid.iter_steps():
         leftA = np.eye(n_eqs) - 0.5*dt*A
         right_b = (np.eye(n_eqs) + 0.5*dt*A)@sol
-        sol = linalg.solve(leftA ,right_b)
+        sol = linalg.solve(leftA, right_b)
 
         if step.should_save:
             p_list.append(sol.copy())
 
-    return list(p_list)
+    return p_list
 
 
 def solve_dual(
@@ -308,7 +308,7 @@ def solve_dual(
     """
     p_list = solve_dual_ode(model=model, psi=psi, time_grid=time_grid, comp_index=comp_index)
 
-    lifted_x0 = psi.lift(x0).reshape(-1)
+    lifted_x0 = psi.lift(x0[np.newaxis, :]).reshape(-1)
     stats = [np.dot(p, lifted_x0) for p in p_list]
 
     return StatsTrajectory(time_grid=time_grid, values=np.asarray(stats), states=p_list)
